@@ -11,6 +11,8 @@ import multer from "multer";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import { marked } from "marked";
+import removeMarkdown from "remove-markdown";
 
 dotenv.config();
 
@@ -212,11 +214,14 @@ app.post("/chat", async (req, res) => {
   // const completion = await tu_openai(userMessage);
   // const completion = mocupAnswer(userMessage);
   // const completion = await chat_api(userMessage, userHistory);
-  let completion_json ;
+  let completion_json;
   if (userMessage == "mflv[q") {
-    let img1 = "https://media.istockphoto.com/id/2098359215/th/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%96%E0%B9%88%E0%B8%B2%E0%B8%A2/%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%84%E0%B8%B4%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%94%E0%B8%B4%E0%B8%88%E0%B8%B4%E0%B8%97%E0%B8%B1%E0%B8%A5-%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B9%81%E0%B8%A5%E0%B9%87%E0%B8%9B%E0%B8%97%E0%B9%87%E0%B8%AD%E0%B8%9B%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%82%E0%B8%86%E0%B8%A9%E0%B8%93%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%81%E0%B8%A5%E0%B8%A2%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94.jpg?s=1024x1024&w=is&k=20&c=fHsavC3OcjObDobIjDEJ3p9VgcoA_Desvp9B1OgPHic=";
-    let img2 = "https://media.istockphoto.com/id/1939608350/th/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%96%E0%B9%88%E0%B8%B2%E0%B8%A2/%E0%B8%8A%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%B8%E0%B8%82%E0%B9%82%E0%B8%94%E0%B8%A2%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B9%81%E0%B8%A5%E0%B9%87%E0%B8%9B%E0%B8%97%E0%B9%87%E0%B8%AD%E0%B8%9B%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-%E0%B9%80%E0%B8%97%E0%B8%84%E0%B9%82%E0%B8%99%E0%B9%82%E0%B8%A5%E0%B8%A2%E0%B8%B5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%84%E0%B8%B4%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B9%8D%E0%B8%B2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%8A%E0%B8%B2.jpg?s=1024x1024&w=is&k=20&c=pMINTPD_UOO-N_AVe44xmgvYMQTl39DZyOmYoHP84B8=";
-    let video = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+    let img1 =
+      "https://media.istockphoto.com/id/2098359215/th/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%96%E0%B9%88%E0%B8%B2%E0%B8%A2/%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%84%E0%B8%B4%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%94%E0%B8%B4%E0%B8%88%E0%B8%B4%E0%B8%97%E0%B8%B1%E0%B8%A5-%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B9%81%E0%B8%A5%E0%B9%87%E0%B8%9B%E0%B8%97%E0%B9%87%E0%B8%AD%E0%B8%9B%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%82%E0%B8%86%E0%B8%A9%E0%B8%93%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%81%E0%B8%A5%E0%B8%A2%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94.jpg?s=1024x1024&w=is&k=20&c=fHsavC3OcjObDobIjDEJ3p9VgcoA_Desvp9B1OgPHic=";
+    let img2 =
+      "https://media.istockphoto.com/id/1939608350/th/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%96%E0%B9%88%E0%B8%B2%E0%B8%A2/%E0%B8%8A%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%B8%E0%B8%82%E0%B9%82%E0%B8%94%E0%B8%A2%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B9%81%E0%B8%A5%E0%B9%87%E0%B8%9B%E0%B8%97%E0%B9%87%E0%B8%AD%E0%B8%9B%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-%E0%B9%80%E0%B8%97%E0%B8%84%E0%B9%82%E0%B8%99%E0%B9%82%E0%B8%A5%E0%B8%A2%E0%B8%B5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%84%E0%B8%B4%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B9%8D%E0%B8%B2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%8A%E0%B8%B2.jpg?s=1024x1024&w=is&k=20&c=pMINTPD_UOO-N_AVe44xmgvYMQTl39DZyOmYoHP84B8=";
+    let video =
+      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4";
 
     const exBubble = {
       output: `ldkcnksdcpsac lkcmpwcmpdc lkcnpwmcpwmc lkmcpwmcp
@@ -226,7 +231,52 @@ app.post("/chat", async (req, res) => {
           ldkcnksdcpsac lkcmpwcmpdc lkcnpwmcpwmc lkmcpwmcp
           <video>${video}<video>`,
     };
-    const completion = chat_formatting(exBubble);
+
+    const exBubble2 = {
+      output: `### ขั้นตอนที่ 2: การจัดการการฝากหลักทรัพย์
+
+
+หลังจากที่คุณได้เข้าสู่เว็บไซต์ PTI (Post Trade Integration) เรียบร้อยแล้ว ต่อไปคือการดำเนินการฝากหลักทรัพย์
+
+
+1. **เลือกโมดูล Depository:**
+   - เลือก Module: Depository และตามด้วย Function: Deposit
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_1.jpg)
+
+
+2. **รายการฝาก:**
+   - เลือกเมนู "สร้างรายการฝาก"
+   - จะมีหน้าต่างขึ้นมาให้กรอกรายละเอียดต่างๆ เช่น ข้อมูลหลักทรัพย์ และจำนวนหุ้น
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_2.jpg)
+
+
+3. **กรอกข้อมูลหลักทรัพย์:**
+   - เลือกเมนู "สร้างรายการฝาก" และกรอกรายละเอียดหลักทรัพย์ที่ต้องการฝาก
+   - สามารถกรอกข้อมูลผู้ฝากและรายละเอียดหุ้น
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_3.jpg)
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_4.jpg)
+
+
+4. **ตรวจสอบและยืนยันข้อมูล:**
+   - หลังจากกรอกข้อมูลทั้งหมดแล้ว ให้ตรวจสอบความถูกต้องก่อนยืนยัน
+   - หากข้อมูลทั้งหมดถูกต้อง ให้ทำการกดยืนยัน (Submit)
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_5.jpg)
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_6.jpg)
+
+
+5. **การยืนยันรายการ:**
+   - หลังจากการยืนยัน (Submit) ระบบจะสร้างหมายเลขธุรกรรม และสามารถพิมพ์ slip การฝากได้
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_7.jpg)
+     ![ภาพประกอบ](https://cubikaai.southeastasia.cloudapp.azure.com/images/poc_set/img_8.jpg)
+
+
+---
+
+
+คุณทำตามขั้นตอนนี้เรียบร้อยแล้วหรือไม่ครับ หรือต้องการให้ผ่านไปยังขั้นตอนถัดไป?`,
+    };
+
+    const completion = chat_formatting(exBubble2);
     completion_json = JSON.parse(completion);
   } else {
     const completion = await chat_api2(userMessage, userHistory);
@@ -561,19 +611,17 @@ function chat_formatting(data) {
       },
     ],
   };
-  let text = data.output.replace(/<[^>]*>[^<]*<[^>]*>/g, '');
-  let html = data.output.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/<img>(.*?)<img>/g, '<img src="$1" />');
-  html = html.replace(/<video>(.*?)<video>/g, `<video controls>
-  <source src="$1" type="video/mp4">
-Your browser does not support the video tag.
-</video>`);
-  console.log(`text: ${text}`);
-  console.log(`html: ${html}`);
+
+  const text2 = removeMarkdown(data.output, {
+    useImgAltText: false
+  });
+  const html2 = marked(data.output);
+  console.log(`text: ${text2}`);
+  console.log(`html: ${html2}`);
   let contentJson = [
     {
-      text: text,
-      html: html,
+      text: text2,
+      html: html2,
       facialExpression: "smile",
       animation: "Talking_0",
     },
